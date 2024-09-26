@@ -24,7 +24,7 @@ def test_divide(a, b, expected):
 def test_divide_by_zero():
     with pytest.raises(ValueError):
         Calculator.divide(1, 0)
-        
+
 def test_add_to_history():
     calc = Calculator()
     calc.add_to_history("2 + 2 = 4")
@@ -35,4 +35,3 @@ def test_clear_history():
     calc.add_to_history("2 + 2 = 4")
     Calculator.clear_history()
     assert len(Calculator.get_history()) == 0
-
