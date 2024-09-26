@@ -1,0 +1,25 @@
+[MASTER]
+init-hook='import sys; sys.path.append(".")'
+
+[MESSAGES CONTROL]
+disable=
+
+[REPORTS]
+output-format=colorized
+reports=yes
+
+[DESIGN]
+max-parents=15
+max-attributes=10
+min-public-methods=0
+max-public-methods=20
+
+[BASIC]
+variable-rgx=[a-z_][a-z0-9_]{0,30}$
+function-rgx=[a-z_][a-z0-9_]{2,50}$
+argument-rgx=[a-z_][a-z0-9_]{1,30}$
+method-rgx=[a-z_][a-z0-9_]{2,50}$
+module-rgx=[a-z_][a-z0-9_]{1,30}$
+
+# If you're not using Django, comment out or remove the following line:
+# load-plugins=pylint_django
