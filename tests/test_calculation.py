@@ -1,3 +1,7 @@
+"""
+Test suite for the Calculation class.
+"""
+
 from calculator.calculation import Calculation
 
 def test_calculation_create():
