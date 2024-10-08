@@ -1,37 +1,89 @@
-import sys
-from calculator.calculator import Calculator
-from decimal import Decimal, InvalidOperation
+import os
+import importlib
+from commands import AddCommand, SubtractCommand, MultiplyCommand, DivideCommand, MenuCommand
 
-def calculate_and_print(a, b, operation_name):
-    operation_mappings = {
-        'add': Calculator.add,
-        'subtract': Calculator.subtract,
-        'multiply': Calculator.multiply,
-        'divide': Calculator.divide
-    }
+def load_plugins(commands):
+    """Dynamically load command plugins from the 'plugins' folder."""
+    plugin_folder = './plugins'
+    for file in os.listdir(plugin_folder):
+        if file.endswith('.py'):
+            module_name = file[:-3]
+            module = importlib.import_module(f'plugins.{module_name}')
+            command_class = getattr(module, f'{module_name.capitalize()}Command')
+            commands[module_name] = command_class()
 
-    # Unified error handling for decimal conversion
-    try:
-        a_decimal, b_decimal = map(Decimal, [a, b])
-        result = operation_mappings.get(operation_name)  # Use get to handle unknown operations
-        if result:
-            print(f"The result of {a} {operation_name} {b} is equal to {result(a_decimal, b_decimal)}")
-        else:
-            print(f"Unknown operation: {operation_name}")
-    except InvalidOperation:
-        print(f"Invalid number input: {a} or {b} is not a valid number.")
-    except ZeroDivisionError:
-        print("An error occurred: Cannot divide by zero.")
-    except Exception as e:  # Catch-all for unexpected errors
-        print(f"An error occurred: {e}")
+def print_menu(commands):
+    """Prints the available commands in a user-friendly format."""
+    print("\nAvailable commands:")
+    for command in commands:
+        print(f" - {command}")
+    print("\nType 'menu' to see available commands again or 'exit' to quit.")
 
 def main():
-    if len(sys.argv) != 4:
-        print("Usage: python main.py <number1> <number2> <operation>")
-        sys.exit(1)
+    commands = {
+        'add': AddCommand(),
+        'subtract': SubtractCommand(),
+        'multiply': MultiplyCommand(),
+        'divide': DivideCommand(),
+        'menu': MenuCommand(),
+    }
 
-    _, a, b, operation = sys.argv
-    calculate_and_print(a, b, operation)
+    load_plugins(commands)  # Load additional commands from the plugins folder
 
-if __name__ == '__main__':
+    print("\nWelcome to the Interactive Calculator!")
+    print_menu(commands)
+
+    while True:
+        user_input = input("\nEnter command and number(s) (e.g., 'add 1 2', 'square 4'), or 'exit' to quit: ")
+
+        if user_input == 'exit':
+            print("Goodbye!")
+            break
+
+        try:
+            inputs = user_input.split()
+            command_name = inputs[0]
+
+            if command_name == 'menu':
+                print_menu(commands)
+                continue
+
+            if command_name in commands:
+                # Handle two-argument commands (e.g., add, subtract, multiply, divide)
+                if command_name in ['add', 'subtract', 'multiply', 'divide'] and len(inputs) != 3:
+                    raise ValueError(f"{command_name} requires 2 numbers. Usage: {command_name} <num1> <num2>")
+                # Handle one-argument commands (e.g., square, cube, sqrt)
+                elif command_name not in ['add', 'subtract', 'multiply', 'divide'] and len(inputs) != 2:
+                    raise ValueError(f"{command_name} requires 1 number. Usage: {command_name} <num1>")
+                
+                # Execute the command
+                if len(inputs) == 3:  # Commands that take 2 arguments
+                    x = float(inputs[1])
+                    y = float(inputs[2])
+                    result = commands[command_name].execute(x, y)
+                else:  # Commands that take 1 argument
+                    x = float(inputs[1])
+                    result = commands[command_name].execute(x)
+
+                # Display result and format output
+                if isinstance(result, complex):
+                    # Display only the real part if the imaginary part is 0
+                    if result.imag == 0:
+                        print(f"\nResult: {result.real}")
+                    else:
+                        print(f"\nResult: {result}")
+                elif isinstance(result, float) and result.is_integer():
+                    print(f"\nResult: {int(result)}")
+                else:
+                    print(f"\nResult: {result}")
+            else:
+                print(f"Unknown command: '{command_name}'")
+
+        except ValueError as e:
+            print(f"Error: {e}")
+        except Exception as e:
+            print(f"Invalid input or error: {e}")
+
+
+if __name__ == "__main__":
     main()

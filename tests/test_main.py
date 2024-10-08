@@ -1,26 +1,118 @@
-"""
-This module tests the main calculation functions for the calculator.
-"""
-
 import pytest
-from main import calculate_and_print  # Ensure this import matches your project structure
+from main import main
 
-# Parameterize the test function to cover different operations and scenarios, including errors
-@pytest.mark.parametrize("a_string, b_string, operation_string, expected_string", [
-    ("5", "3", 'add', "The result of 5 add 3 is equal to 8"),
-    ("10", "2", 'subtract', "The result of 10 subtract 2 is equal to 8"),
-    ("4", "5", 'multiply', "The result of 4 multiply 5 is equal to 20"),
-    ("20", "4", 'divide', "The result of 20 divide 4 is equal to 5"),
-    ("1", "0", 'divide', "An error occurred: Cannot divide by zero."),  # <-- Add period here
-    ("9", "3", 'unknown', "Unknown operation: unknown"),  # Test for unknown operation
-    ("a", "3", 'add', "Invalid number input: a or 3 is not a valid number."),
-    ("5", "b", 'subtract', "Invalid number input: 5 or b is not a valid number.")
-])
-def test_calculate_and_print(a_string, b_string, operation_string, expected_string, capsys):
-    """
-    Tests the `calculate_and_print` function with various 
-    valid and invalid inputs to ensure correct output and error handling.
-    """
-    calculate_and_print(a_string, b_string, operation_string)
+def test_repl_add(monkeypatch, capsys):
+    """Test the REPL with the 'add' command."""
+    # Simulate user input
+    inputs = iter(["add 2 3", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    # Run the REPL
+    main()
+
+    # Capture the output
     captured = capsys.readouterr()
-    assert captured.out.strip() == expected_string
+    assert "Result: 5" in captured.out
+
+def test_repl_subtract(monkeypatch, capsys):
+    """Test the REPL with the 'subtract' command."""
+    inputs = iter(["subtract 10 2", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "Result: 8" in captured.out
+
+def test_repl_multiply(monkeypatch, capsys):
+    """Test the REPL with the 'multiply' command."""
+    inputs = iter(["multiply 3 4", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "Result: 12" in captured.out
+
+def test_repl_divide(monkeypatch, capsys):
+    """Test the REPL with the 'divide' command."""
+    inputs = iter(["divide 9 3", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "Result: 3" in captured.out
+
+def test_repl_divide_by_zero(monkeypatch, capsys):
+    """Test the divide command with a divisor of zero."""
+    inputs = iter(["divide 5 0", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "Cannot divide by zero" in captured.out
+
+def test_repl_square(monkeypatch, capsys):
+    """Test the REPL with the 'square' command."""
+    inputs = iter(["square 4", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "Result: 16" in captured.out
+
+def test_repl_sqrt(monkeypatch, capsys):
+    """Test the REPL with the 'sqrt' command."""
+    inputs = iter(["sqrt 9", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "Result: 3" in captured.out
+
+def test_repl_invalid_command(monkeypatch, capsys):
+    """Test the REPL with an invalid command."""
+    inputs = iter(["invalid_command", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "Unknown command" in captured.out
+
+def test_repl_invalid_input(monkeypatch, capsys):
+    """Test the REPL when non-numeric input is provided."""
+    inputs = iter(["add a b", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "could not convert string to float: 'a'" in captured.out
+
+def test_repl_missing_argument(monkeypatch, capsys):
+    """Test the REPL with missing arguments for a command."""
+    inputs = iter(["add 2", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "add requires 2 numbers" in captured.out
+
+def test_repl_menu(monkeypatch, capsys):
+    """Test the REPL with the 'menu' command."""
+    inputs = iter(["menu", "exit"])
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+    main()
+
+    captured = capsys.readouterr()
+    assert "add" in captured.out
+    assert "subtract" in captured.out
+    assert "multiply" in captured.out
+    assert "divide" in captured.out

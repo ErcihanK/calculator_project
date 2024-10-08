@@ -18,17 +18,16 @@ def pytest_addoption(parser):
         help="number of fake records to generate"
     )
 
-
 @pytest.fixture
 def num_records(request):
     """Fixture to get the number of records."""
     return int(request.config.getoption("--num_records"))
 
 @pytest.fixture
-def fake_data(record_count):  # Use a different name for the parameter
+def fake_data(num_records):
     """Generates fake test data for the calculator."""
     data = []
-    for _ in range(record_count):  # Use the renamed variable here
+    for _ in range(num_records):
         a = fake.random_number(digits=2, fix_len=False)
         b = fake.random_number(digits=2, fix_len=False)
         operation = fake.random_element(elements=("add", "subtract", "multiply", "divide"))
@@ -45,9 +44,9 @@ def fake_data(record_count):  # Use a different name for the parameter
         data.append((a, b, operation, expected))
     return data
 
-
 def pytest_generate_tests(metafunc):
     """Parametrize test cases with fake data."""
     if {"a", "b", "operation", "expected"} <= set(metafunc.fixturenames):
-        # Use the fixture `fake_data` to parametrize the tests
-        metafunc.parametrize("a, b, operation, expected", metafunc.config.getoption("fake_data"))
+        # Get the fake_data fixture and parametrize tests
+        fake_data = metafunc.config._request.getfixturevalue("fake_data")
+        metafunc.parametrize("a, b, operation, expected", fake_data)
