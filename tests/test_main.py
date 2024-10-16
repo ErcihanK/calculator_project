@@ -113,7 +113,9 @@ def test_repl_menu(monkeypatch, caplog):
     with caplog.at_level(logging.INFO):
         main()
 
+    # Instead of exact matches, check if these commands are in the output
     assert "add" in caplog.text
     assert "subtract" in caplog.text
     assert "multiply" in caplog.text
     assert "divide" in caplog.text
+
