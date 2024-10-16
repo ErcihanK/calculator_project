@@ -2,9 +2,6 @@ import os
 import logging
 from dotenv import load_dotenv
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 # Load environment variables from .env file
 load_dotenv()
 
@@ -12,6 +9,13 @@ load_dotenv()
 ENV = os.getenv('ENV')
 API_KEY = os.getenv('API_KEY')
 
-# Log the environment variables (instead of printing)
-logging.info(f"Running in {ENV} environment")
-logging.info(f"API Key: {API_KEY}")
+# Set up logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+)
+
+logger = logging.getLogger(__name__)
+
+logger.info(f"Running in {ENV} environment")
+logger.info(f"API Key: {API_KEY}")
