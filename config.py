@@ -7,5 +7,5 @@ load_dotenv()
 # Access environment variables
 ENV = os.getenv('ENV')
 API_KEY = os.getenv('API_KEY')
+print(API_KEY,ENV)
 
-# Optionally, add any other environment-related logic here
