@@ -22,8 +22,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run script
-        run: python config.py
+
+      - name: Run config script
+        run: python config.py  # Running config.py to check environment variable loading
+
       - name: Run tests 
         run: |
           pytest
