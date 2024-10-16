@@ -1,6 +1,11 @@
 import os
 import importlib
+import logging
 from commands import AddCommand, SubtractCommand, MultiplyCommand, DivideCommand, MenuCommand
+from config import ENV, API_KEY
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def load_plugins(commands):
     """Dynamically load command plugins from the 'plugins' folder."""
@@ -13,13 +18,16 @@ def load_plugins(commands):
             commands[module_name] = command_class()
 
 def print_menu(commands):
-    """Prints the available commands in a user-friendly format."""
-    print("\nAvailable commands:")
+    """Logs the available commands."""
+    logging.info("\nAvailable commands:")
     for command in commands:
-        print(f" - {command}")
-    print("\nType 'menu' to see available commands again or 'exit' to quit.")
+        logging.info(f" - {command}")
+    logging.info("\nType 'menu' to see available commands again or 'exit' to quit.")
 
 def main():
+    logging.info(f"\nRunning in {ENV} environment")
+    logging.info(f"API Key: {API_KEY}")
+
     commands = {
         'add': AddCommand(),
         'subtract': SubtractCommand(),
@@ -30,14 +38,14 @@ def main():
 
     load_plugins(commands)  # Load additional commands from the plugins folder
 
-    print("\nWelcome to the Interactive Calculator!")
+    logging.info("\nWelcome to the Interactive Calculator!")
     print_menu(commands)
 
     while True:
         user_input = input("\nEnter command and number(s) (e.g., 'add 1 2', 'square 4'), or 'exit' to quit: ")
 
         if user_input == 'exit':
-            print("Goodbye!")
+            logging.info("Goodbye!")
             break
 
         try:
@@ -49,41 +57,28 @@ def main():
                 continue
 
             if command_name in commands:
-                # Handle two-argument commands (e.g., add, subtract, multiply, divide)
                 if command_name in ['add', 'subtract', 'multiply', 'divide'] and len(inputs) != 3:
                     raise ValueError(f"{command_name} requires 2 numbers. Usage: {command_name} <num1> <num2>")
-                # Handle one-argument commands (e.g., square, cube, sqrt)
                 elif command_name not in ['add', 'subtract', 'multiply', 'divide'] and len(inputs) != 2:
                     raise ValueError(f"{command_name} requires 1 number. Usage: {command_name} <num1>")
-                
+
                 # Execute the command
-                if len(inputs) == 3:  # Commands that take 2 arguments
+                if len(inputs) == 3:
                     x = float(inputs[1])
                     y = float(inputs[2])
                     result = commands[command_name].execute(x, y)
-                else:  # Commands that take 1 argument
+                else:
                     x = float(inputs[1])
                     result = commands[command_name].execute(x)
 
-                # Display result and format output
-                if isinstance(result, complex):
-                    # Display only the real part if the imaginary part is 0
-                    if result.imag == 0:
-                        print(f"\nResult: {result.real}")
-                    else:
-                        print(f"\nResult: {result}")
-                elif isinstance(result, float) and result.is_integer():
-                    print(f"\nResult: {int(result)}")
-                else:
-                    print(f"\nResult: {result}")
+                logging.info(f"Result: {result}")
             else:
-                print(f"Unknown command: '{command_name}'")
+                logging.error(f"Unknown command: '{command_name}'")
 
         except ValueError as e:
-            print(f"Error: {e}")
+            logging.error(f"Error: {e}")
         except Exception as e:
-            print(f"Invalid input or error: {e}")
-
+            logging.error(f"Invalid input or error: {e}")
 
 if __name__ == "__main__":
     main()
