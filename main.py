@@ -1,6 +1,10 @@
 import os
 import importlib
 from commands import AddCommand, SubtractCommand, MultiplyCommand, DivideCommand, MenuCommand
+from dotenv import load_dotenv  # Import the load_dotenv function
+
+# Load environment variables from the .env file
+load_dotenv()
 
 def load_plugins(commands):
     """Dynamically load command plugins from the 'plugins' folder."""
@@ -20,6 +24,14 @@ def print_menu(commands):
     print("\nType 'menu' to see available commands again or 'exit' to quit.")
 
 def main():
+    # Access environment variables
+    env = os.getenv('ENV')
+    api_key = os.getenv('API_KEY')
+
+    # Display the environment information (useful for testing and debugging)
+    print(f"\nRunning in {env} environment")
+    print(f"API Key: {api_key}")
+
     commands = {
         'add': AddCommand(),
         'subtract': SubtractCommand(),
@@ -55,7 +67,7 @@ def main():
                 # Handle one-argument commands (e.g., square, cube, sqrt)
                 elif command_name not in ['add', 'subtract', 'multiply', 'divide'] and len(inputs) != 2:
                     raise ValueError(f"{command_name} requires 1 number. Usage: {command_name} <num1>")
-                
+
                 # Execute the command
                 if len(inputs) == 3:  # Commands that take 2 arguments
                     x = float(inputs[1])
