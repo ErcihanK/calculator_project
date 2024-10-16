@@ -1,7 +1,14 @@
 import os
 import importlib
+import logging
 from commands import AddCommand, SubtractCommand, MultiplyCommand, DivideCommand, MenuCommand
-from config import logger  # Import the logger
+from dotenv import load_dotenv
+
+# Load environment variables from the .env file
+load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 def load_plugins(commands):
     """Dynamically load command plugins from the 'plugins' folder."""
@@ -14,13 +21,21 @@ def load_plugins(commands):
             commands[module_name] = command_class()
 
 def print_menu(commands):
-    """Logs the available commands in a user-friendly format."""
-    logger.info("Available commands:")
+    """Prints the available commands in a user-friendly format."""
+    logging.info("\nAvailable commands:")
     for command in commands:
-        logger.info(f" - {command}")
-    logger.info("Type 'menu' to see available commands again or 'exit' to quit.")
+        logging.info(f" - {command}")
+    logging.info("\nType 'menu' to see available commands again or 'exit' to quit.")
 
 def main():
+    # Access environment variables
+    env = os.getenv('ENV')
+    api_key = os.getenv('API_KEY')
+
+    # Display the environment information (useful for testing and debugging)
+    logging.info(f"Running in {env} environment")
+    logging.info(f"API Key: {api_key}")
+
     commands = {
         'add': AddCommand(),
         'subtract': SubtractCommand(),
@@ -31,14 +46,14 @@ def main():
 
     load_plugins(commands)  # Load additional commands from the plugins folder
 
-    logger.info("Welcome to the Interactive Calculator!")
+    logging.info("Welcome to the Interactive Calculator!")
     print_menu(commands)
 
     while True:
         user_input = input("\nEnter command and number(s) (e.g., 'add 1 2', 'square 4'), or 'exit' to quit: ")
 
         if user_input == 'exit':
-            logger.info("Goodbye!")
+            logging.info("Goodbye!")
             break
 
         try:
@@ -66,15 +81,25 @@ def main():
                     x = float(inputs[1])
                     result = commands[command_name].execute(x)
 
-                # Log the result
-                logger.info(f"Result: {result}")
+                # Display result and format output
+                if isinstance(result, complex):
+                    # Display only the real part if the imaginary part is 0
+                    if result.imag == 0:
+                        logging.info(f"Result: {result.real}")
+                    else:
+                        logging.info(f"Result: {result}")
+                elif isinstance(result, float) and result.is_integer():
+                    logging.info(f"Result: {int(result)}")
+                else:
+                    logging.info(f"Result: {result}")
             else:
-                logger.error(f"Unknown command: '{command_name}'")
+                logging.error(f"Unknown command: '{command_name}'")
 
         except ValueError as e:
-            logger.error(f"Error: {e}")
+            logging.error(f"Error: {e}")
         except Exception as e:
-            logger.error(f"Invalid input or error: {e}")
+            logging.error(f"Invalid input or error: {e}")
+
 
 if __name__ == "__main__":
     main()
